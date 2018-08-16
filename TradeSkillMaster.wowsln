@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# WowAddOnStudio Solution File, Format Version 11.00
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E6E1D386-69D8-4755-9E61-0950293915FC}") = "TradeSkillMaster", "TradeSkillMaster\TradeSkillMaster.wowproj", "{D620BC5F-8A31-4671-95B5-0F8EC80B1C91}"
+EndProject
+Project("{E6E1D386-69D8-4755-9E61-0950293915FC}") = "TradeSkillMaster_Accounting", "TradeSkillMaster_Accounting\TradeSkillMaster_Accounting.wowproj", "{9EA1E2E9-04EF-4C9F-BA3E-62F699898EE7}"
+EndProject
+Project("{E6E1D386-69D8-4755-9E61-0950293915FC}") = "TradeSkillMaster_AuctionDB", "TradeSkillMaster_AuctionDB\TradeSkillMaster_AuctionDB.wowproj", "{D6585C1E-D288-419E-A028-178289A2ECFB}"
+EndProject
+Project("{E6E1D386-69D8-4755-9E61-0950293915FC}") = "TradeSkillMaster_Auctioning", "TradeSkillMaster_Auctioning\TradeSkillMaster_Auctioning.wowproj", "{D5CB7136-6C39-400C-8C8C-7C10539E62C4}"
+EndProject
+Project("{E6E1D386-69D8-4755-9E61-0950293915FC}") = "TradeSkillMaster_Crafting", "TradeSkillMaster_Crafting\TradeSkillMaster_Crafting.wowproj", "{92A2F709-B1AC-4A26-9461-DF1787D559AB}"
+EndProject
+Project("{E6E1D386-69D8-4755-9E61-0950293915FC}") = "TradeSkillMaster_Destroying", "TradeSkillMaster_Destroying\TradeSkillMaster_Destroying.wowproj", "{C74417B8-935B-4E86-BD9C-90FA7FA2569D}"
+EndProject
+Project("{E6E1D386-69D8-4755-9E61-0950293915FC}") = "TradeSkillMaster_ItemTracker", "TradeSkillMaster_ItemTracker\TradeSkillMaster_ItemTracker.wowproj", "{8E8EC8F6-A034-4405-85C2-BE4A59EB450E}"
+EndProject
+Project("{E6E1D386-69D8-4755-9E61-0950293915FC}") = "TradeSkillMaster_Mailing", "TradeSkillMaster_Mailing\TradeSkillMaster_Mailing.wowproj", "{92E4B815-4160-4DF7-A07C-266432B05295}"
+EndProject
+Project("{E6E1D386-69D8-4755-9E61-0950293915FC}") = "TradeSkillMaster_Shopping", "TradeSkillMaster_Shopping\TradeSkillMaster_Shopping.wowproj", "{6C576FB3-8B48-4052-8515-7AFCEC398B48}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Default|Any CPU = Default|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D620BC5F-8A31-4671-95B5-0F8EC80B1C91}.Default|Any CPU.ActiveCfg = Default|Any CPU
+		{D620BC5F-8A31-4671-95B5-0F8EC80B1C91}.Default|Any CPU.Build.0 = Default|Any CPU
+		{9EA1E2E9-04EF-4C9F-BA3E-62F699898EE7}.Default|Any CPU.ActiveCfg = Default|Any CPU
+		{9EA1E2E9-04EF-4C9F-BA3E-62F699898EE7}.Default|Any CPU.Build.0 = Default|Any CPU
+		{D6585C1E-D288-419E-A028-178289A2ECFB}.Default|Any CPU.ActiveCfg = Default|Any CPU
+		{D6585C1E-D288-419E-A028-178289A2ECFB}.Default|Any CPU.Build.0 = Default|Any CPU
+		{D5CB7136-6C39-400C-8C8C-7C10539E62C4}.Default|Any CPU.ActiveCfg = Default|Any CPU
+		{D5CB7136-6C39-400C-8C8C-7C10539E62C4}.Default|Any CPU.Build.0 = Default|Any CPU
+		{92A2F709-B1AC-4A26-9461-DF1787D559AB}.Default|Any CPU.ActiveCfg = Default|Any CPU
+		{92A2F709-B1AC-4A26-9461-DF1787D559AB}.Default|Any CPU.Build.0 = Default|Any CPU
+		{C74417B8-935B-4E86-BD9C-90FA7FA2569D}.Default|Any CPU.ActiveCfg = Default|Any CPU
+		{C74417B8-935B-4E86-BD9C-90FA7FA2569D}.Default|Any CPU.Build.0 = Default|Any CPU
+		{8E8EC8F6-A034-4405-85C2-BE4A59EB450E}.Default|Any CPU.ActiveCfg = Default|Any CPU
+		{8E8EC8F6-A034-4405-85C2-BE4A59EB450E}.Default|Any CPU.Build.0 = Default|Any CPU
+		{92E4B815-4160-4DF7-A07C-266432B05295}.Default|Any CPU.ActiveCfg = Default|Any CPU
+		{92E4B815-4160-4DF7-A07C-266432B05295}.Default|Any CPU.Build.0 = Default|Any CPU
+		{6C576FB3-8B48-4052-8515-7AFCEC398B48}.Default|Any CPU.ActiveCfg = Default|Any CPU
+		{6C576FB3-8B48-4052-8515-7AFCEC398B48}.Default|Any CPU.Build.0 = Default|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
