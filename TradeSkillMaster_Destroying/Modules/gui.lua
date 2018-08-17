@@ -136,7 +136,17 @@ function private:CreateDestroyingFrame()
 				destroyBtn:SetAttribute("macrotext1", format("/cast %s;\n/use %d %d", data.spell, data.bag, data.slot))
 				destroyBtn:Disable()
 				TSMAPI:CancelFrame("destroyEnableDelay")
-				TSMAPI:CreateTimeDelay("destroyEnableDelay", 3, function() if not UnitCastingInfo("player") and not LootFrame:IsVisible() then destroyBtn:Enable() end end)
+				TSMAPI:CreateTimeDelay("destroyEnableDelay", 3, function()
+					if not UnitCastingInfo("player") and not LootFrame:IsVisible() then
+						destroyBtn:Enable()
+					else
+						-- Check delay again
+						TSMAPI:CreateTimeDelay("destroyEnableDelay", 0.5, function()
+							-- Always re enable the button if we get here
+							destroyBtn:Enable()
+						end)
+					end
+				end)
 				private.highStack = data.numDestroys > 1
 				private.currentSpell = data.spell
 			end
