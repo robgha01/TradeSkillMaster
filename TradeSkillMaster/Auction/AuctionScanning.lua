@@ -332,6 +332,32 @@ function private:AddAuctionRecord(index)
 		private.data[baseItemString].isBaseItem = true
 	end
 
+	-- add any random enchants if necessary
+	local _,_,rarity = TSMAPI:GetSafeItemInfo(itemString)
+	if rarity >= 3 then
+		local reLink,reIcon = TSMAPI:GetRandomEnchant("auction", "list", index)
+		if reLink then
+			--ViragDevTool_AddData(rarity,"TSM - Rarity")
+			--ViragDevTool_AddData({reLink,reIcon},"TSM - GetRandomEnchant")
+			local reCount
+			-- Create a new entry in the table
+			if not private.data[reLink] then
+				private.data[reLink] = TSMAPI.AuctionScan:NewAuctionItem()
+				private.data[reLink]:SetItemLink(reLink)
+				private.data[reLink]:SetTexture(reIcon)
+				private.data[reLink].count = 1
+				reCount = 1
+			else
+				reCount = private.data[reLink].count + 1
+				--ViragDevTool_AddData(private.data[reLink],"TSM")
+			end
+			--ViragDevTool_AddData(reCount,"TSM - reCount")
+			--ViragDevTool_AddData({reCount, minBid, minIncrement, buyout, bid, highBidder, seller or "?", timeLeft},"TSM - AddAuctionRecord")
+			private.data[reLink]:AddAuctionRecord(reCount, minBid, minIncrement, buyout, bid, highBidder, seller or "?", timeLeft)
+			private.data[reLink].isRE = true			
+		end
+	end
+
 	if select(8, TSMAPI:GetSafeItemInfo(link)) == count then
 		return (buyout or 0) / count > (private.maxPrice or math.huge)
 	end

@@ -178,6 +178,8 @@ local AuctionItem = {
 		record:SetData(self, ...)
 		if strfind(self.itemLink, "battlepet") then
 			record.uniqueID = table.concat({TSMAPI:Select({2, 3, 4, 5, 6, 7}, (":"):split(self.itemLink))}, ".")
+		elseif strfind(self.itemLink, ":RE") then
+			record.uniqueID = select(1, (":"):split(self.itemLink:match("%d+:RE")))
 		else
 			record.uniqueID = select(9, (":"):split(self.itemLink))
 		end

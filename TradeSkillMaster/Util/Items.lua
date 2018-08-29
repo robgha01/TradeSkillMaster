@@ -108,6 +108,8 @@ function TSMAPI:GetSafeItemInfo(link)
 			local minLvl, iType, _, stackSize, _, _, vendorPrice = unpack(PET_CAGE_ITEM_INFO)
 			local subType, equipLoc = 0, ""
 			itemInfoCache[link] = {name, link, quality, level, minLvl, iType, subType, stackSize, equipLoc, texture, vendorPrice}
+		elseif strfind(link, ":RE") then
+			itemInfoCache[link] = {TSMAPI:GetRandomEnchantInfo(link)}
 		elseif strmatch(link, "item:") then
 			itemInfoCache[link] = {GetItemInfo(link)}
 		end
@@ -124,9 +126,10 @@ end
 function TSMAPI:GetItemID(itemLink)
 	if not itemLink or type(itemLink) ~= "string" then return nil, "invalid args" end
 	
-	-- Remove any random enchant information
-	--local parts = {("/"):split(itemLink)}
-	--itemLink = parts[1]
+	-- Handle Random Enchants
+	if strfind(itemLink, ":RE") then
+		return select(1, (":"):split(itemLink:match("%d+:RE")))
+	end
 
 	local test = select(2, strsplit(":", itemLink))
 	if not test then return nil, "invalid link" end

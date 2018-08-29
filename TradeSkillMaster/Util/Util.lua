@@ -99,6 +99,7 @@ function TSMAPI:IsPlayer(target)
 	return strlower(target) == strlower(UnitName("player")) or (strfind(target, "-") and strlower(target) == strlower(UnitName("player").."-"..GetRealmName()))
 end
 
+local reCache = {}
 CreateFrame('GameTooltip', 'TSMAPITooltip', nil, 'GameTooltipTemplate')
 function TSMAPI:GetRandomEnchant(setter, arg1, arg2)
     TSMAPITooltip:SetOwner(UIParent, 'ANCHOR_NONE')
@@ -114,15 +115,75 @@ function TSMAPI:GetRandomEnchant(setter, arg1, arg2)
 	    TSMAPITooltip:SetHyperlink(arg1)
     end
 
-    local re = nil
+    local reLink,reIcon = nil,nil
     for i = 1, TSMAPITooltip:NumLines() do
 		t = _G[TSMAPITooltip:GetName().."TextLeft"..i]:GetText()
-		if t and string.find(t,"^Equip:") then 
-			re = t
-			break
+		if t and string.find(t,"^Equip:") then
+			local reVal = nil
+			local re = string.gsub(t, "Equip: ","")
+			local internalReID = TSMAPI:StringHash(re)
+			if reCache[internalReID] then
+				--ViragDevTool_AddData({reCache[internalReID]}, "TSMAPI:GetRandomEnchant - Found internal cache record")
+				reVal = reCache[internalReID]
+			else
+				for k,v in pairs(AIO_REs) do
+					if type(v) == "table" then
+						--ViragDevTool_AddData({v[4] == re, v[4], re, v}, "TSMAPI:GetRandomEnchant - Is match")
+						if v[4] == re then
+							--ViragDevTool_AddData({re, v}, "TSMAPI:GetRandomEnchant - Found re")
+							reCache[internalReID] = v
+							reVal = v
+							break
+						end
+					end
+				end
+			end
+			if reVal then
+				local _, id, name, desc, rarity, icon = unpack(reVal)
+				local x = tonumber(rarity:match("%d"))
+				--reID = v[2]
+				--reName = v[3]
+				--reRank = select(2, GetEnchantColor(v[5]))
+				reLink = format("|c%s|Hspell:%s:RE|h[%s]|h|r",x,id,name)
+				reIcon = icon
+			end
 		end
     end
-    return re
+    return reLink,reIcon
+end
+
+-- Arguments:
+--	randomEnchantLink: The re link ex: "|c3|Hspell:12345:RE|h[SomeName]|h|r" (string)
+-- Returns:
+--	name - Name of the random enchant (string)
+--	link - A hyperlink for the random enchant (string, hyperlink)
+--	quality - Quality (rarity) level of the item. (number, itemQuality)
+--	iLevel - [NotUsed: Always 0]
+--	reqLevel - [NotUsed: Always 0]
+--	class - Localized name of the item's class/type (as in the list returned by GetAuctionItemClasses()) (string)
+--	subclass - Localized name of the item's subclass/subtype (as in the list returned by GetAuctionItemSubClasses()) (string)
+--	maxStack - [NotUsed: Always 1]
+--	equipSlot - [NotUsed: Always empty string]
+--	texture - Path to an icon texture for the random enchant (string)	
+function TSMAPI:GetRandomEnchantInfo(link)
+	if type(link) ~= "string" then return end
+	local reID = string.match(link,"(%d+):RE")
+	local reName = string.match(link,"h%[(%w+)%]")
+	local reRank = string.match(link,"(%d+)")
+	local reIcon = ""
+
+	for k,v in pairs(AIO_REs) do
+		if type(v) == "table" then
+			local _, id, name, desc, rarity, icon = unpack(v)
+			local x = tonumber(rarity:match("%d"))
+			if reID == id and reRank == x and reName == name then
+				reIcon = icon
+				break
+			end
+		end
+	end
+
+	return name,link,rank,0,0,"Miscellaneous","Other",1,"",reIcon
 end
 
 function TSMAPI:StringHash(text)

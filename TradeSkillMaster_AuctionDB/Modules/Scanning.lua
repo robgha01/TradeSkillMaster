@@ -187,7 +187,15 @@ function Scan:ProcessScanData(scanData)
 	local data = {}
 	
 	for itemString, obj in pairs(scanData) do
-		if TSMAPI:GetBaseItemString(itemString) == itemString then
+		local baseItemString = TSMAPI:GetBaseItemString(itemString)
+		if strfind(itemString, ":RE") then
+			ViragDevTool_AddData({itemString, obj},"Scan:ProcessScanData")
+			ViragDevTool_AddData(baseItemString == itemString or strfind(baseItemString, "spell:"),"Scan:IsMatch")
+			ViragDevTool_AddData(itemString,"Scan:Arg1")
+			ViragDevTool_AddData(baseItemString,"Scan:Arg2")
+		end
+
+		if baseItemString == itemString or strfind(baseItemString, "spell:") then
 			local itemID = obj:GetItemID()
 			local quantity, minBuyout, records = 0, 0
 			local records = {}
@@ -208,7 +216,9 @@ function Scan:ProcessScanData(scanData)
 	if Scan.isScanning ~= "group" then
 		TSM.db.factionrealm.lastCompleteScan = time()
 	end
+	ViragDevTool_AddData(data,"data")
 	TSM.Data:ProcessData(data, Scan.groupItems)
+	ViragDevTool_AddData({TSM.Data},"TSM.Data")
 end
 
 function Scan:ProcessImportedData(auctionData)
