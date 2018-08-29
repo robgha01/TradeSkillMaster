@@ -183,7 +183,30 @@ function TSMAPI:GetRandomEnchantInfo(link)
 		end
 	end
 
-	return name,link,rank,0,0,"Miscellaneous","Other",1,"",reIcon
+	return name,link,rank,0,0,11,5,1,"",reIcon
+end
+
+local reCacheBySpellID = {}
+function TSMAPI:GetRandomEnchantInfoBySpellID(spellID)
+	if type(spellID) ~= "number" then return end
+	if reCacheBySpellID[spellID] then
+		return reCacheBySpellID[spellID]
+	end
+	local reID,reName,reLink,reRank,reIcon
+	for k,v in pairs(AIO_REs) do
+		if type(v) == "table" then
+			local _, id, name, desc, rarity, icon = unpack(v)
+			local x = tonumber(rarity:match("%d"))
+			reID = id
+			reName = name
+			reLink = format("|c%s|Hspell:%s:RE|h[%s]|h|r",x,id,name)
+			reRank = x
+			reIcon = icon
+			reCacheBySpellID[spellID] = {reName,reLink,reRank,0,0,11,5,1,"",reIcon}
+			return reCacheBySpellID[spellID]
+		end
+	end
+	return nil
 end
 
 function TSMAPI:StringHash(text)
