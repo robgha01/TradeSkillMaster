@@ -14,6 +14,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_AuctionDB") -- lo
 Scan.groupScanData = {}
 Scan.filterList = {}
 Scan.numFilters = 0
+local BASE_DELAY = 0.1 -- time to delay for before trying to scan a page again when it isn't fully loaded
 
 
 local function ScanCallback(event, ...)
@@ -26,6 +27,22 @@ local function ScanCallback(event, ...)
 		Scan:DoneScanning()
 	elseif event == "INTERRUPTED" then
 		Scan:DoneScanning()
+	end
+end
+
+local function ScanRECallback(index, reQueries, event, ...)
+	ViragDevTool_AddData({index, reQueries},"ScanRECallback")
+	if event == "SCAN_PAGE_UPDATE" then
+		local page, total = ...
+		TSM.GUI:UpdateStatus(format(L["Scanning random enchant %s, page %s/%s"], reQueries[index], page, total), page*100/total)
+	elseif event == "SCAN_COMPLETE" then
+		local data = ...
+		Scan:ProcessRandomEnchantsScanData(data)
+		TSMAPI:CreateTimeDelay("scanREIndexDelay", BASE_DELAY, function() Scan:ScanREIndex(index+1,reQueries) end)
+		-- Scan:DoneScanning()		
+	elseif event == "INTERRUPTED" then
+		TSMAPI:CancelFrame("scanREIndexDelay")
+		Scan:DoneScanning()		
 	end
 end
 
@@ -54,13 +71,6 @@ function Scan.ProcessGetAllScan(self)
 		end
 		
 		local itemID = TSMAPI:GetItemID(GetAuctionItemLink("list", i))
-		--local itemRE = TSMAPI:GetRandomEnchant("auction", "list", i)
-
-		--if itemRE then
-		--	-- Create a unique id if this has a random enchant
-		--	itemID = format("%s\re:%s", itemID, TSMAPI:StringHash(itemRE))
-		--end
-
 		local _, _, count, _, _, _, _, _, _, buyout = GetAuctionItemInfo("list", i)
 		if itemID and buyout and buyout > 0 then
 			data[itemID] = data[itemID] or {records={}, minBuyout=math.huge, quantity=0}
@@ -160,12 +170,50 @@ function Scan:StartGroupScan(items)
 end
 
 function Scan:StartFullScan()
+	-- Disabled normal scanning for re testing uncomment!
+	--Scan.isScanning = "Full"
+	--TSM.GUI:UpdateStatus(L["Running query..."])
+	--Scan.isBuggedGetAll = nil
+	--Scan.groupItems = nil
+	--TSMAPI.AuctionScan:StopScan()
+	--TSMAPI.AuctionScan:RunQuery({name=""}, ScanCallback)
+
+	-- Now scan for all random enchants
+	Scan:StartREScan()
+end
+
+function Scan:StartREScan()
 	Scan.isScanning = "Full"
-	TSM.GUI:UpdateStatus(L["Running query..."])
 	Scan.isBuggedGetAll = nil
 	Scan.groupItems = nil
 	TSMAPI.AuctionScan:StopScan()
-	TSMAPI.AuctionScan:RunQuery({name=""}, ScanCallback)
+	TSM.GUI:UpdateStatus(L["Running random enchant query..."])
+	
+	local reQueriesInvert,reQueries,index = {},{},0
+	for k,v in pairs(AIO_REs) do
+	   if type(v) == "table" then
+		  local _, id, name, desc, rarity, icon = unpack(v)
+		  if not reQueriesInvert[name] then
+			reQueriesInvert[name] = index
+			reQueries[index] = name 
+			index = index + 1
+		  end
+	   end
+	end
+
+	Scan:ScanREIndex(0, reQueries)
+end
+
+function Scan:ScanREIndex(index, reQueries)
+	local name = reQueries[index]
+	if name then
+		ViragDevTool_AddData(name,"ScanREIndex - Scanning")
+		--TSM.GUI:UpdateStatus(L["Scanning %s..."]:format(name))
+		TSMAPI.AuctionScan:RunQuery({name=name}, function(...) ScanRECallback(index, reQueries, ...) end)
+	else
+		TSMAPI:CancelFrame("scanREIndexDelay")
+		Scan:DoneScanning()
+	end
 end
 
 function Scan:StartGetAllScan()
@@ -183,19 +231,45 @@ function Scan:DoneScanning()
 	Scan.getAllLoaded = nil
 end
 
+function Scan:ProcessRandomEnchantsScanData(scanData)
+	local data = {}
+	
+	for itemString, obj in pairs(scanData) do
+		local itemID = obj:GetItemID()
+		local quantity, minBuyout, records = 0, 0
+		local records = {}
+		for _, record in ipairs(obj.records) do
+			local itemBuyout = record:GetItemBuyout()
+			if itemBuyout and (itemBuyout < minBuyout or minBuyout == 0) then
+				minBuyout = itemBuyout
+			end
+			quantity = quantity + record.count
+			for i=1, record.count do
+				tinsert(records, itemBuyout)
+			end
+		end
+		data[itemID] = {records=records, minBuyout=minBuyout, quantity=quantity}
+	end
+	
+	if Scan.isScanning ~= "group" then
+		TSM.db.factionrealm.lastCompleteScan = time()
+	end
+	TSM.Data:ProcessData(data, Scan.groupItems)	
+end
+
 function Scan:ProcessScanData(scanData)
 	local data = {}
 	
 	for itemString, obj in pairs(scanData) do
 		local baseItemString = TSMAPI:GetBaseItemString(itemString)
-		if strfind(itemString, ":RE") then
-			ViragDevTool_AddData({itemString, obj},"Scan:ProcessScanData")
-			ViragDevTool_AddData(baseItemString == itemString or strfind(baseItemString, "spell:"),"Scan:IsMatch")
-			ViragDevTool_AddData(itemString,"Scan:Arg1")
-			ViragDevTool_AddData(baseItemString,"Scan:Arg2")
-		end
+		--if strfind(itemString, ":RE") then
+		--	ViragDevTool_AddData({itemString, obj},"Scan:ProcessScanData")
+		--	ViragDevTool_AddData(baseItemString == itemString or strfind(baseItemString, "spell:"),"Scan:IsMatch")
+		--	ViragDevTool_AddData(itemString,"Scan:Arg1")
+		--	ViragDevTool_AddData(baseItemString,"Scan:Arg2")
+		--end
 
-		if baseItemString == itemString or strfind(baseItemString, "spell:") then
+		if baseItemString == itemString then -- or strfind(baseItemString, "spell:") then
 			local itemID = obj:GetItemID()
 			local quantity, minBuyout, records = 0, 0
 			local records = {}
@@ -216,9 +290,7 @@ function Scan:ProcessScanData(scanData)
 	if Scan.isScanning ~= "group" then
 		TSM.db.factionrealm.lastCompleteScan = time()
 	end
-	ViragDevTool_AddData(data,"data")
-	TSM.Data:ProcessData(data, Scan.groupItems)
-	ViragDevTool_AddData({TSM.Data},"TSM.Data")
+	TSM.Data:ProcessData(data, Scan.groupItems)	
 end
 
 function Scan:ProcessImportedData(auctionData)
