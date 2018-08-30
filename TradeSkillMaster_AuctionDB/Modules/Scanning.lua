@@ -14,7 +14,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_AuctionDB") -- lo
 Scan.groupScanData = {}
 Scan.filterList = {}
 Scan.numFilters = 0
-Scan.randomEnchants = nil
+Scan.randomEnchants = {}
 Scan.randomEnchantsScanData = {}
 local BASE_DELAY = 0.1 -- time to delay for before trying to scan a page again when it isn't fully loaded
 
@@ -38,7 +38,7 @@ local function ScanRECallback(index, event, ...)
 		TSM.GUI:UpdateStatus(format(L["Scanning random enchant %s/%s, page %s/%s"], index, Scan.randomEnchants[0], page, total), page*100/total)
 	elseif event == "SCAN_COMPLETE" then
 		local data = ...
-		ViragDevTool_AddData(data,"ScanRECallback")
+		ViragDevTool_AddData({...},"ScanRECallback")
 		Scan.randomEnchantsScanData[index] = data
 		TSMAPI:CreateTimeDelay("scanREIndexDelay", BASE_DELAY, function() Scan:ScanREIndex(index+1,reQueries) end)		
 	elseif event == "INTERRUPTED" then
@@ -187,28 +187,31 @@ function Scan:StartREScan()
 	TSMAPI.AuctionScan:StopScan()
 	TSM.GUI:UpdateStatus(L["Running random enchant query..."])
 	Scan.randomEnchantsScanData = {}
-
-	if Scan.randomEnchants == nil then
-		Scan.randomEnchants = {}
-		local reQueriesInvert,index = {},1
-		for k,v in pairs(AIO_REs) do
-		   if type(v) == "table" then
-			  local _, id, name, desc, rarity, icon = unpack(v)
-			  if not reQueriesInvert[name] then
+	
+	local reQueriesInvert,index = {},1
+	for k,v in pairs(AIO_REs) do
+		if type(v) == "table" then
+			local _, id, name, desc, rarity, icon = unpack(v)
+			if not reQueriesInvert[name] then
 				reQueriesInvert[name] = index
 				Scan.randomEnchants[index] = name
 				Scan.randomEnchants[0] = index -- store the count at index 0
 				index = index + 1
 
 				-- Test with someting that exists
-				if strfind(name, "improved howl of terror") then
+				if name == "Improved Howl of Terror" then
 					break
 				end
-			  end
-		   end
+			end
 		end
 	end
 
+	--if Scan.randomEnchants == nil then
+	--	Scan.randomEnchants = {}
+		
+	--end
+
+	ViragDevTool_AddData(Scan.randomEnchantsScanData,"Scan.randomEnchantsScanData")
 	Scan:ScanREIndex(1)
 end
 
@@ -246,11 +249,29 @@ end
 function Scan:ProcessREScanData(scanData)
 	if Scan.processingRandomEnchantData then TSMAPI:CreateTimeDelay(0.2, function() Scan:ProcessREScanData(scanData) end) end
 	
+	local scanDataList = {}
+	--local itemList = {}	
+	for itemID, data in pairs(scanData) do
+		tinsert(scanDataList, {itemID, data})
+		--if strfind(itemID, "^item:") then
+		--	for _, record in ipairs(data.records) do
+		--		tinsert(itemList, record)
+		--	end
+		--else
+		--	reID = itemID
+			
+		--	itemList = { records = {} }
+		--end
+	end
+	
+	ViragDevTool_AddData(scanDataList,"scanDataList")
+
 	local index = 1
 	local data = {}
 	local function DoDataProcessing()
 		for i = 1, 500 do
-			if index > #scanData then
+			if index > #scanDataList then
+				ViragDevTool_AddData({#scanDataList},"DoDataProcessing - Done")
 				TSM.GUI:UpdateStatus("Processing Completed")
 				TSMAPI:CancelFrame("reProcessDelay")
 				Scan.processingRandomEnchantData = nil
@@ -258,25 +279,23 @@ function Scan:ProcessREScanData(scanData)
 				break
 			end
 			
-			if scanData[index] then
-				ViragDevTool_AddData(scanData[index],"scanData")
-				local itemString, obj = unpack(scanData[index])
-				TSM.GUI:UpdateStatus(format("Processing... %s/%s",index,#scanData))
-				local itemID = obj:GetItemID()
-				local quantity, minBuyout, records = 0, 0
-				local records = {}
-				for _, record in ipairs(obj.records) do
-					local itemBuyout = record:GetItemBuyout()
-					if itemBuyout and (itemBuyout < minBuyout or minBuyout == 0) then
-						minBuyout = itemBuyout
-					end
-					quantity = quantity + record.count
-					for i=1, record.count do
-						tinsert(records, itemBuyout)
-					end
+			ViragDevTool_AddData(scanDataList[index],"scanDataList index "..index)
+			local itemString, obj = unpack(scanDataList[index])
+			TSM.GUI:UpdateStatus(format("Processing... %s/%s",index,#scanDataList))
+			local itemID = obj:GetItemID()
+			local quantity, minBuyout, records = 0, 0
+			local records = {}
+			for _, record in ipairs(obj.records) do
+				local itemBuyout = record:GetItemBuyout()
+				if itemBuyout and (itemBuyout < minBuyout or minBuyout == 0) then
+					minBuyout = itemBuyout
 				end
-				data[itemID] = {records=records, minBuyout=minBuyout, quantity=quantity}
+				quantity = quantity + record.count
+				for i=1, record.count do
+					tinsert(records, itemBuyout)
+				end
 			end
+			data[itemID] = {records=records, minBuyout=minBuyout, quantity=quantity}
 			index = index + 1
 		end
 
