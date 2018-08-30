@@ -85,12 +85,14 @@ function private:CreateStartScanContent(parent)
 		self.startGetAllButton:Enable()
 		self.startFullScanButton:Enable()
 		self.startGroupScanButton:Enable()
+		self.startREScanButton:Enable()
 	end
 
 	frame.Disable = function(self)
 		self.startGetAllButton:Disable()
 		self.startFullScanButton:Disable()
 		self.startGroupScanButton:Disable()
+		self.startREScanButton:Disable()
 	end
 	
 	-- top row (auto updater)
@@ -166,13 +168,22 @@ function private:CreateStartScanContent(parent)
 	btn:SetText(L["Run Full Scan"])
 	btn.tooltip = L["A full auction house scan will scan every item on the auction house but is far slower than a GetAll scan. Expect this scan to take several minutes or longer."]
 	frame.startFullScanButton = btn
+
+	local btn = TSMAPI.GUI:CreateButton(buttonFrame, 18)
+	btn:SetPoint("TOPLEFT", 6, -180)
+	btn:SetPoint("TOPRIGHT", -6, -180)
+	btn:SetHeight(22)
+	btn:SetScript("OnClick", TSM.Scan.StartREScan)
+	btn:SetText(L["Run RE Scan"])
+	btn.tooltip = L["Scan the auction house for random enchants. Expect this scan to take several minutes or longer."]
+	frame.startREScanButton = btn
 	
-	TSMAPI.GUI:CreateHorizontalLine(buttonFrame, -200)
+	TSMAPI.GUI:CreateHorizontalLine(buttonFrame, -230)
 	
 	-- third row (group scan)
 	local btn = TSMAPI.GUI:CreateButton(buttonFrame, 18)
-	btn:SetPoint("TOPLEFT", 6, -225)
-	btn:SetPoint("TOPRIGHT", -6, -225)
+	btn:SetPoint("TOPLEFT", 6, -255)
+	btn:SetPoint("TOPRIGHT", -6, -255)
 	btn:SetHeight(22)
 	btn:SetScript("OnClick", GUI.StartGroupScan)
 	btn:SetText(L["Scan Selected Groups"])

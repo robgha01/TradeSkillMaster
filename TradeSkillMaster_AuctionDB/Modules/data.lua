@@ -184,6 +184,59 @@ function Data:ProcessData(scanData, groupItems)
 	TSMAPI:CreateTimeDelay("adbProcessDelay", 0, DoDataProcessing, 0.1)
 end
 
+function Data:ProcessREData(scanData)
+	if TSM.processingData then return TSMAPI:CreateTimeDelay(0.2, function() Data:ProcessREData(scanData) end) end
+
+	local scanDataList = {}
+	for itemID, data in pairs(scanData) do
+		tinsert(scanDataList, {itemID, data})
+	end
+	
+	-- go through each item and figure out the market value / update the data table
+	local index = 1
+	local day = Data:GetDay()
+	local function DoDataProcessing()
+		for i = 1, 500 do
+			if index > #scanDataList then
+				TSMAPI:CancelFrame("adbProcessDelay")
+				TSM.processingData = nil
+				break
+			end
+			
+			local itemID, data = unpack(scanDataList[index])
+			TSM:DecodeItemData(itemID)
+			TSM.data[itemID] = TSM.data[itemID] or {scans={}, lastScan = 0}
+			local marketValue = Data:CalculateMarketValue(data.records)
+			
+			ViragDevTool_AddData(marketValue,"marketValue")
+			
+			local scanData = TSM.data[itemID].scans
+			scanData[day] = scanData[day] or {avg=0, count=0}
+			if type(scanData[day]) == "number" then
+				-- this should never happen...
+				scanData[day] = {scanData[day]}
+			end
+			scanData[day].avg = scanData[day].avg or 0
+			scanData[day].count = scanData[day].count or 0
+			if #scanData[day] > 0 then
+				scanData[day] = Data:ConvertScansToAvg(scanData[day])
+			end
+			scanData[day].avg = floor((scanData[day].avg * scanData[day].count + marketValue) / (scanData[day].count + 1) + 0.5)
+			scanData[day].count = scanData[day].count + 1
+			
+			TSM.data[itemID].lastScan = TSM.db.factionrealm.lastCompleteScan
+			TSM.data[itemID].minBuyout = data.minBuyout > 0 and data.minBuyout or nil
+			Data:UpdateMarketValue(TSM.data[itemID])
+			TSM:EncodeItemData(itemID)
+			
+			index = index + 1
+		end
+	end
+	
+	TSM.processingData = true
+	TSMAPI:CreateTimeDelay("adbProcessDelay", 0, DoDataProcessing, 0.1)
+end
+
 function Data:CalculateMarketValue(records)
 	local totalNum, totalBuyout = 0, 0
 	local numRecords = #records

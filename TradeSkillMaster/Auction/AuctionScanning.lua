@@ -195,7 +195,7 @@ function private:SendQuery()
 		-- Query the auction house (then waits for AUCTION_ITEM_LIST_UPDATE to fire)
 		AuctionScanning:RegisterEvent("AUCTION_ITEM_LIST_UPDATE", eventHandler)
 		
-		ViragDevTool_AddData({private.query.name, private.query.minLevel, private.query.maxLevel, private.query.invType, private.query.class, private.query.subClass, private.query.page, private.query.usable, private.query.quality},"SendQuery")
+		--ViragDevTool_AddData({private.query.name, private.query.minLevel, private.query.maxLevel, private.query.invType, private.query.class, private.query.subClass, private.query.page, private.query.usable, private.query.quality},"SendQuery")
 		QueryAuctionItems(private.query.name, private.query.minLevel, private.query.maxLevel, private.query.invType, private.query.class, private.query.subClass, private.query.page, private.query.usable, private.query.quality)
 	else
 		-- run delay timer then try again to scan
