@@ -171,12 +171,12 @@ end
 
 function Scan:StartFullScan()
 	-- Disabled normal scanning for re testing uncomment!
-	--Scan.isScanning = "Full"
-	--TSM.GUI:UpdateStatus(L["Running query..."])
-	--Scan.isBuggedGetAll = nil
-	--Scan.groupItems = nil
-	--TSMAPI.AuctionScan:StopScan()
-	--TSMAPI.AuctionScan:RunQuery({name=""}, ScanCallback)
+	Scan.isScanning = "Full"
+	TSM.GUI:UpdateStatus(L["Running query..."])
+	Scan.isBuggedGetAll = nil
+	Scan.groupItems = nil
+	TSMAPI.AuctionScan:StopScan()
+	TSMAPI.AuctionScan:RunQuery({name=""}, ScanCallback)
 
 	-- Now scan for all random enchants
 	Scan:StartREScan()
