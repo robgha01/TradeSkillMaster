@@ -38,7 +38,6 @@ local function ScanRECallback(index, event, ...)
 		TSM.GUI:UpdateStatus(format(L["Scanning random enchant %s/%s, page %s/%s"], index, Scan.randomEnchants[0], page, total), page*100/total)
 	elseif event == "SCAN_COMPLETE" then
 		local data = ...
-		ViragDevTool_AddData({...},"ScanRECallback")
 		Scan.randomEnchantsScanData[index] = data
 		TSMAPI:CreateTimeDelay("scanREIndexDelay", BASE_DELAY, function() Scan:ScanREIndex(index+1,reQueries) end)		
 	elseif event == "INTERRUPTED" then
@@ -78,7 +77,7 @@ function Scan.ProcessGetAllScan(self)
 			data[itemID].minBuyout = min(data[itemID].minBuyout, buyout)
 			data[itemID].quantity = data[itemID].quantity + count
 			for j=1, count do
-				ViragDevTool_AddData({data[itemID]}, "data[itemID]")
+				TSM:Debug("data[itemID]", {data[itemID]})
 				tinsert(data[itemID].records, floor(buyout/count))
 			end
 		end
@@ -211,7 +210,7 @@ function Scan:StartREScan()
 		
 	--end
 
-	ViragDevTool_AddData(Scan.randomEnchantsScanData,"Scan.randomEnchantsScanData")
+	TSM:Debug("Scan.randomEnchantsScanData",Scan.randomEnchantsScanData)
 	Scan:ScanREIndex(1)
 end
 
@@ -264,14 +263,14 @@ function Scan:ProcessREScanData(scanData)
 		--end
 	end
 	
-	ViragDevTool_AddData(scanDataList,"scanDataList")
+	TSM:Debug("scanDataList",scanDataList)
 
 	local index = 1
 	local data = {}
 	local function DoDataProcessing()
 		for i = 1, 500 do
 			if index > #scanDataList then
-				ViragDevTool_AddData({#scanDataList},"DoDataProcessing - Done")
+				TSM:Debug({#scanDataList},"DoDataProcessing - Done")
 				TSM.GUI:UpdateStatus("Processing Completed")
 				TSMAPI:CancelFrame("reProcessDelay")
 				Scan.processingRandomEnchantData = nil
@@ -279,7 +278,7 @@ function Scan:ProcessREScanData(scanData)
 				break
 			end
 			
-			ViragDevTool_AddData(scanDataList[index],"scanDataList index "..index)
+			TSM:Debug("scanDataList index "..index, scanDataList[index])
 			local itemString, obj = unpack(scanDataList[index])
 			TSM.GUI:UpdateStatus(format("Processing... %s/%s",index,#scanDataList))
 			local itemID = obj:GetItemID()
@@ -314,13 +313,6 @@ function Scan:ProcessScanData(scanData)
 	
 	for itemString, obj in pairs(scanData) do
 		local baseItemString = TSMAPI:GetBaseItemString(itemString)
-		--if strfind(itemString, ":RE") then
-		--	ViragDevTool_AddData({itemString, obj},"Scan:ProcessScanData")
-		--	ViragDevTool_AddData(baseItemString == itemString or strfind(baseItemString, "spell:"),"Scan:IsMatch")
-		--	ViragDevTool_AddData(itemString,"Scan:Arg1")
-		--	ViragDevTool_AddData(baseItemString,"Scan:Arg2")
-		--end
-
 		if baseItemString == itemString then -- or strfind(baseItemString, "spell:") then
 			local itemID = obj:GetItemID()
 			local quantity, minBuyout, records = 0, 0

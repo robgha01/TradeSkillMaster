@@ -208,7 +208,7 @@ function Data:ProcessREData(scanData)
 			TSM.data[itemID] = TSM.data[itemID] or {scans={}, lastScan = 0}
 			local marketValue = Data:CalculateMarketValue(data.records)
 			
-			ViragDevTool_AddData(marketValue,"marketValue")
+			TSM:Debug("marketValue", marketValue)
 			
 			local scanData = TSM.data[itemID].scans
 			scanData[day] = scanData[day] or {avg=0, count=0}

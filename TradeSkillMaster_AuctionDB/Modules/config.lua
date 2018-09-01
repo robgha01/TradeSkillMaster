@@ -344,13 +344,13 @@ function Config:GetSearchData()
 			TSM:DecodeItemData(itemID)
 			local data = TSM.data[itemID]
 			local timeDiff = data.lastScan and SecondsToTime(time() - data.lastScan)
-			local name, link = TSMAPI:GetRandomEnchantInfoBySpellID(itemID) or GetItemInfo(itemID)
+			local name, link = GetItemInfo(itemID)
 
-			ViragDevTool_AddData({data},"Config:GetSearchData")
+			--TSM:Debug("Config:GetSearchData",{data})
 			if link == nil then
-				ViragDevTool_AddData(name, "name")
-				ViragDevTool_AddData(link, "link")
-				ViragDevTool_AddData({data},"Getting Random Enchant")
+				--TSM:Debug("name", name)
+				--TSM:Debug("link", link)
+				--TSM:Debug("Getting Random Enchant", {data})
 				name, link = TSMAPI:GetRandomEnchantInfoBySpellID(itemID)
 				link = TSMAPI:GetSafeItemInfo(link)
 			end
