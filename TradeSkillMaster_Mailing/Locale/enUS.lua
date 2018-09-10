@@ -13,6 +13,8 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("TradeSkillMaster_Mailing", "enUS", true)
 if not L then return end
 
+L["Buy: %s | %s | %s"] = true
+L["Sale: %s | %s | %s"] = true
 L["%s to collect."] = true
 L["%s total gold collected!"] = true
 L["AH Mail:"] = true
@@ -40,6 +42,7 @@ L["Collected mail from %s with a subject of '%s'."] = true
 L["Collected purchase of %s (%d) for %s."] = true
 L["Collected sale of %s (%d) for %s."] = true
 L["Collected sale of %s for %s."] = true
+L["Collected purchase of %s for %s."] = true
 L["Could not loot item from mail because your bags are full."] = true
 L["Could not send mail due to not having free bag space available to split a stack of items."] = true
 L["Default Mailing Page"] = true

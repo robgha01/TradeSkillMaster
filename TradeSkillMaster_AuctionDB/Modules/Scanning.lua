@@ -94,6 +94,10 @@ function Scan.ProcessGetAllScan(self)
 	-- Send to Auctionator if exists
 	if Atr_ProcessGetAllScanFromExternalAddon then
 		Atr_ProcessGetAllScanFromExternalAddon()
+		TSM.GUI:UpdateStatus(L["Processing data..."])
+		while not (gAtr_FullScanState == ATR_FS_NULL) do
+			self:Sleep(0.2)
+		end
 	end
 
 	TSM:Print(L["It is strongly recommended that you reload your ui (type '/reload') after running a GetAll scan. Otherwise, any other scans (Post/Cancel/Search/etc) will be much slower than normal."])
