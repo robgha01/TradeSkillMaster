@@ -77,7 +77,7 @@ function Scan.ProcessGetAllScan(self)
 			data[itemID].minBuyout = min(data[itemID].minBuyout, buyout)
 			data[itemID].quantity = data[itemID].quantity + count
 			for j=1, count do
-				TSM:Debug("data[itemID]", {data[itemID]})
+				--TSM:Debug("data[itemID]", {data[itemID]})
 				tinsert(data[itemID].records, floor(buyout/count))
 			end
 		end
@@ -91,6 +91,11 @@ function Scan.ProcessGetAllScan(self)
 		self:Sleep(0.2)
 	end
 	
+	-- Send to Auctionator if exists
+	if Atr_ProcessGetAllScanFromExternalAddon then
+		Atr_ProcessGetAllScanFromExternalAddon()
+	end
+
 	TSM:Print(L["It is strongly recommended that you reload your ui (type '/reload') after running a GetAll scan. Otherwise, any other scans (Post/Cancel/Search/etc) will be much slower than normal."])
 end
 
